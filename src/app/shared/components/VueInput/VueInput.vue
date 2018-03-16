@@ -17,7 +17,7 @@
       @focus="onFocus"
     />
     <span :class="$style.bar"></span>
-    <label :for="name">{{placeholder}}<sup v-if="required">*</sup></label>
+    <label :for="name">{{placeholder}}<sup v-if="required">*</sup><sup v-else>&nbsp;</sup></label>
     <div :class="$style.message">{{message}}</div>
   </div>
 </template>
@@ -27,7 +27,7 @@
     name:       'VueInput',
     components: {},
     props:      {
-      cssClass: {
+      cssClass:    {
         type:    String,
         default: 'vueInput',
       },
@@ -138,13 +138,13 @@
       font-weight:    $input-placeholder-font-weight;
       position:       absolute;
       pointer-events: none;
-      top:            $input-placeholder-top;
+      top:            -4px;
       transition:     0.2s ease all;
     }
 
     input:focus ~ label,
     input.hasValue ~ label {
-      top:         -($input-placeholder-top + 8);
+      top:         -($input-placeholder-top);
       font-size:   $input-placeholder-active-font-size;
       font-weight: $input-placeholder-active-font-weight;
       color:       $input-placeholder-active-font-color;

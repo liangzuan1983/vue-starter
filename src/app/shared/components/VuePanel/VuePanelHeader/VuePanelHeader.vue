@@ -38,7 +38,7 @@
     },
     computed:   {
       cssClasses() {
-        const classes = ['vue-panel-header', this.$style.vuePanelHeader];
+        const classes = [this.$style.vuePanelHeader];
 
         if (this.image) {
           classes.push(this.$style.withImage);

@@ -19,6 +19,8 @@
   "components.register.consent": "I consent to get contacted",
   "components.register.email": "Email",
   "components.register.email.invalidText": "This is not a valid email address!",
+  "components.register.firstname": "Firstname",
+  "components.register.lastname": "Lastname",
   "components.register.name": "Name",
   "components.register.name.invalidText": "Please provide first and last name",
   "components.register.phone": "Phone",

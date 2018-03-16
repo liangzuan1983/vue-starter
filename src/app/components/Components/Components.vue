@@ -297,20 +297,22 @@
 
       <vue-grid-item>
         <div class="h1">{{ $t('components.forms' /*Forms*/) }}</div>
-        <vue-form :schema="registerSchema" @submit="formSubmit" @reset="formReset">
-          <div slot="middle">
-            named slot in the middle (defined in schema)
-          </div>
+        <vue-panel>
+          <vue-panel-header
+            :title="$t('components.register.title' /* Register */)"
+            :subtitle="$t('components.register.subtitle' /* Please fill in all required fields */)" />
+          <vue-panel-body>
+            <vue-form :schema="registerSchema" @submit="formSubmit" @reset="formReset">
+              <div slot="middle">
+                named slot in the middle (defined in schema)
+              </div>
 
-          <div>
-            default slot is always at the end of the form
-          </div>
-        </vue-form>
-      </vue-grid-item>
-
-      <vue-grid-item>
-        <div class="h1">{{ $t('components.forms' /*Forms*/) }}</div>
-        <vue-form :schema="loginSchema" />
+              <div>
+                default slot is always at the end of the form
+              </div>
+            </vue-form>
+          </vue-panel-body>
+        </vue-panel>
       </vue-grid-item>
 
       <vue-grid-item>
@@ -443,19 +445,34 @@
           submitText:       this.$t('components.register.submitText' /* Submit */),
           id:               'myForm',
           name:             'myForm',
-          title:            this.$t('components.register.title' /* Register */),
-          subtitle:         this.$t('components.register.subtitle' /* Please fill in all required fields */),
           elements:         [
             {
-              type:        'vue-input',
-              model:       'name',
-              required:    true,
-              label:       this.$t('components.register.name' /* Name */),
-              inputType:   'text',
-              isValid(value: string) {
-                return value.trim().indexOf(' ') > -1;
-              },
-              invalidText: this.$t('components.register.name.invalidText' /* Please provide first and last name */),
+              type:     'vue-grid',
+              elements: [
+                {
+                  type:     'vue-grid-item',
+                  elements: [
+                    {
+                      type:      'vue-input',
+                      model:     'firstName',
+                      required:  true,
+                      label:     this.$t('components.register.firstname' /* Firstname */),
+                      inputType: 'text',
+                    },
+                  ],
+                }, {
+                  type:     'vue-grid-item',
+                  elements: [
+                    {
+                      type:      'vue-input',
+                      model:     'lastName',
+                      required:  true,
+                      label:     this.$t('components.register.lastname' /* Lastname */),
+                      inputType: 'text',
+                    },
+                  ],
+                },
+              ],
             },
             {
               type:        'vue-input',
@@ -496,37 +513,6 @@
               required: false,
               label:    this.$t('components.register.consent' /* I consent to get contacted */),
               value:    false,
-            },
-          ],
-        };
-      },
-      loginSchema(): IFormSchema {
-        return {
-          submitText: 'Login',
-          id:         'loginForm',
-          name:       'loginForm',
-          title:      'Login',
-          elements:   [
-            {
-              type:        'vue-input',
-              model:       'email2',
-              required:    true,
-              label:       'Email',
-              inputType:   'email',
-              isValid(value: string) {
-                return isEmailValid(value);
-              },
-              invalidText: 'This is not a valid email address!',
-            },
-            {
-              type:      'vue-input',
-              model:     'password2',
-              required:  true,
-              label:     'Password',
-              inputType: 'password',
-              isValid(value: string) {
-                return value.length > 3;
-              },
             },
           ],
         };
@@ -586,6 +572,7 @@
         console.log(options);
       },
       formSubmit(model: any, reset: any) {
+        console.log(model);
         addNotification(
           {
             title: this.$t('components.register.submit.notification.title', model /* Hey {name}! */),

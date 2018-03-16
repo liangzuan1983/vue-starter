@@ -1,58 +1,42 @@
 <template>
-  <vue-panel :css-class="cssClass">
-    <vue-panel-header v-if="schema.title"
-                      :title="schema.title"
-                      :subtitle="schema.subtitle" />
-    <vue-panel-body>
-      <form :class="$style.vueForm" :name="schema.name" :id="schema.id" @submit.prevent="submitForm()" method="post">
+  <form :class="[$style.vueForm, cssClass]" :name="schema.name" :id="schema.id" @submit.prevent="submitForm()"
+        method="post">
 
-        <div v-for="element in elements">
-          <slot v-if="element.type === 'slot'" :name="element.model" />
-          <keep-alive v-else>
-            <component
-              :key="element.model"
-              :is="element.type"
-              v-bind="getComponentProps(element)"
-              v-on="getComponentHandler(element)" />
-          </keep-alive>
-        </div>
+    <div v-for="(element, idx) in elements" :key="idx">
+      <slot v-if="element.type === 'slot'" :name="element.model" />
+      <vue-form-item
+        v-else
+        :key="idx"
+        :element="element" />
+    </div>
 
-        <vue-button
-          primary
-          :disabled="submitDisabled()"
-          v-if="schema.submitText">
-          {{ schema.submitText }}
-        </vue-button>
+    <vue-button
+      primary
+      :disabled="submitDisabled()"
+      v-if="schema.submitText">
+      {{ schema.submitText }}
+    </vue-button>
 
-        <vue-button
-          v-if="schema.cancellationText"
-          @click.prevent="reset(true)">
-          {{ schema.cancellationText }}
-        </vue-button>
+    <vue-button
+      v-if="schema.cancellationText"
+      @click.prevent="reset(true)">
+      {{ schema.cancellationText }}
+    </vue-button>
 
-        <slot />
-      </form>
-    </vue-panel-body>
-  </vue-panel>
+    <slot />
+  </form>
 </template>
 
 <script lang="ts">
-  import VuePanel                      from '../VuePanel/VuePanel.vue';
-  import VuePanelHeader                from '../VuePanel/VuePanelHeader/VuePanelHeader.vue';
-  import VuePanelBody                  from '../VuePanel/VuePanelBody/VuePanelBody.vue';
-  import VueInput                      from '../VueInput/VueInput.vue';
-  import VueCheckBox                   from '../VueCheckBox/VueCheckBox.vue';
+  import VueFormItem                   from './VueFormItem.vue';
   import VueButton                     from '../VueButton/VueButton.vue';
   import { IFormElement, IFormSchema } from './IFormSchema';
+  import cloneDeep                     from 'lodash/cloneDeep';
 
   export default {
     name:       'VueForm',
     components: {
-      VuePanel,
-      VuePanelHeader,
-      VuePanelBody,
-      VueInput,
-      VueCheckBox,
+      VueFormItem,
       VueButton,
     },
     props:      {
@@ -72,6 +56,13 @@
     },
     computed:   {},
     methods:    {
+      isValid(element: IFormElement): boolean {
+        if (!element.value || !element.isValid) {
+          return true;
+        }
+
+        return element.isValid(element.value);
+      },
       submitDisabled(): boolean {
         let submitDisabled: boolean = false;
 
@@ -100,59 +91,15 @@
           this.$emit('submit', model, this.reset);
         }
       },
-      isValid(element: IFormElement): boolean {
-        if (!element.value || !element.isValid) {
-          return true;
-        }
-
-        return element.isValid(element.value);
-      },
-      getComponentProps(element: IFormElement): any {
-        const isValid: boolean = this.isValid(element);
-        if (element.type === 'vue-input') {
-          return {
-            placeholder: element.label || '',
-            required:    element.required || false,
-            type:        element.inputType || 'text',
-            value:       element.value,
-            name:        element.model,
-            isValid:     isValid,
-            message:     isValid ? '' : element.invalidText,
-          };
-        } else {
-          return {
-            label:   element.label || '',
-            checked: element.value,
-            name:    element.model,
-          };
-        }
-      },
-      getComponentHandler(element: IFormElement): any {
-        if (element.type === 'vue-input') {
-          return {
-            change: (e: any) => {
-              element.value = e.target.value;
-              this.$forceUpdate();
-            },
-          };
-        } else {
-          return {
-            click: (e: any) => {
-              element.value = !element.value;
-              this.$forceUpdate();
-            },
-          };
-        }
-      },
       reset(emit: boolean = false) {
-        const elements: IFormElement[] = JSON.parse(JSON.stringify(this.schema.elements));
+        const elements: IFormElement[] = cloneDeep(this.schema.elements);
         const isValid = () => {
           return true;
         };
 
         this.$data.elements = elements.map((element: IFormElement, idx: number) => {
           element.value = element.value || null;
-          element.isValid = this.schema.elements[idx].isValid ? this.schema.elements[idx].isValid : isValid;
+          element.isValid = element.isValid ? element.isValid : isValid;
 
           return element;
         });
@@ -185,6 +132,33 @@
     button {
       margin-top:    $grid-unit * 5;
       margin-bottom: 0;
+    }
+
+    :global {
+      .vueGrid {
+        margin:  0 -$screen-phone-gutter;
+        padding: 0;
+
+        @include media(tabletPortrait) {
+          margin:  0 -$screen-tablet-portrait-gutter;
+          padding: 0;
+        }
+
+        @include media(tabletLandscape) {
+          margin:  0 -$screen-tablet-landscape-gutter;
+          padding: 0;
+        }
+
+        @include media(smallDesktop) {
+          margin:  0 -$screen-small-desktop-gutter;
+          padding: 0;
+        }
+
+        @include media(largeDesktop) {
+          margin:  0 -$screen-large-desktop-gutter;
+          padding: 0;
+        }
+      }
     }
   }
 </style>
