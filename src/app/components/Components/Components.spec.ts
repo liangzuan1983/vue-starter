@@ -31,13 +31,13 @@ describe('Components.vue', () => {
 
     wrapper.vm.registerSchema.elements.forEach((element: IFormElement) => {
       if (element.isValid) {
-        element.isValid('');
+        element.isValid(element);
       }
     });
 
     wrapper.vm.loginSchema.elements.forEach((element: IFormElement) => {
       if (element.isValid) {
-        element.isValid('');
+        element.isValid(element);
       }
     });
 

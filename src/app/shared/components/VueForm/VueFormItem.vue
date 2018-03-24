@@ -11,11 +11,11 @@
 </template>
 
 <script lang="ts">
-  import VueInput         from '../VueInput/VueInput.vue';
-  import VueCheckBox      from '../VueCheckBox/VueCheckBox.vue';
-  import VueGrid          from '../VueGrid/VueGrid.vue';
-  import VueGridItem      from '../VueGridItem/VueGridItem.vue';
-  import { IFormElement } from './IFormSchema';
+  import VueInput                           from '../VueInput/VueInput.vue';
+  import VueCheckBox                        from '../VueCheckBox/VueCheckBox.vue';
+  import VueGrid                            from '../VueGrid/VueGrid.vue';
+  import VueGridItem                        from '../VueGridItem/VueGridItem.vue';
+  import { IFormElement, IFormValidResult } from './IFormSchema';
 
   export default {
     name:       'VueFormItem',
@@ -32,15 +32,9 @@
       },
     },
     methods:    {
-      isValid(element: IFormElement): boolean {
-        if (!element.value || !element.isValid) {
-          return true;
-        }
-
-        return element.isValid(element.value);
-      },
       getComponentProps(element: IFormElement): any {
-        const isValid: boolean = this.isValid(element);
+        const validResult: IFormValidResult = element.isValid ? element.isValid(element) : { isValid: true };
+
         if (element.type === 'vue-input') {
           return {
             placeholder: element.label || '',
@@ -48,21 +42,29 @@
             type:        element.inputType || 'text',
             value:       element.value,
             name:        element.model,
-            isValid:     isValid,
-            message:     isValid ? '' : element.invalidText,
+            isValid:     validResult.isValid,
+            message:     validResult.message,
           };
         } else if (element.type === 'vue-check-box') {
           return {
-            label:   element.label || '',
-            checked: element.value,
-            name:    element.model,
+            label:    element.label || '',
+            checked:  element.value,
+            name:     element.model,
+            required: element.required,
           };
         }
       },
       getComponentHandler(element: IFormElement): any {
         if (element.type === 'vue-input') {
           return {
+            focus:  () => {
+              element.pristine = true;
+            },
             change: (e: any) => {
+              element.value = e.target.value;
+              this.$forceUpdate();
+            },
+            blur:   (e: any) => {
               element.value = e.target.value;
               this.$forceUpdate();
             },

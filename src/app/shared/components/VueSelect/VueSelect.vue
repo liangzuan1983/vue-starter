@@ -1,6 +1,11 @@
 <template>
   <div :class="cssClasses">
-    <select :multiple="multiple" role="listbox" @change="onChange">
+    <select
+      :multiple="multiple"
+      :required="required"
+      v-bind="$attrs"
+      role="listbox"
+      @change="onChange">
       <option v-for="option in options" :value="option.value" role="option">
         {{option.label}}
       </option>
@@ -31,6 +36,10 @@
         required: false,
         default:  false,
         type:     Boolean,
+      },
+      required: {
+        type:    Boolean,
+        default: false,
       },
     },
     data(): any {

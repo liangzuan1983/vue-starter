@@ -12,8 +12,8 @@
       :class="[
         value ? $style.hasValue : ''
       ]"
-      @keyup="onChange"
-      @change="onChange"
+      v-bind="$attrs"
+      v-on="$listeners"
       @focus="onFocus"
     />
     <span :class="$style.bar"></span>

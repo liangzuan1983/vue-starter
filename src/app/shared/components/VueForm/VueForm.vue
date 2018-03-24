@@ -12,7 +12,7 @@
 
     <vue-button
       primary
-      :disabled="submitDisabled()"
+      :disabled="submitDisabled(elements)"
       v-if="schema.submitText">
       {{ schema.submitText }}
     </vue-button>
@@ -28,10 +28,10 @@
 </template>
 
 <script lang="ts">
-  import VueFormItem                   from './VueFormItem.vue';
-  import VueButton                     from '../VueButton/VueButton.vue';
-  import { IFormElement, IFormSchema } from './IFormSchema';
-  import cloneDeep                     from 'lodash/cloneDeep';
+  import VueFormItem                                     from './VueFormItem.vue';
+  import VueButton                                       from '../VueButton/VueButton.vue';
+  import { IFormElement, IFormSchema, IFormValidResult } from './IFormSchema';
+  import cloneDeep                                       from 'lodash/cloneDeep';
 
   export default {
     name:       'VueForm',
@@ -61,22 +61,28 @@
           return true;
         }
 
-        return element.isValid(element.value);
+        return element.isValid(element).isValid;
       },
-      submitDisabled(): boolean {
-        let submitDisabled: boolean = false;
+      submitDisabled(elements: IFormElement[]): boolean {
+        const max: number = elements.length;
 
-        this.$data.elements.forEach((element: IFormElement) => {
+        for (let i = 0; i < max; i++) {
+          const element: IFormElement = elements[i];
+
           if (this.isValid(element) === false) {
-            submitDisabled = true;
+            return true;
           }
 
           if (element.required && !element.value) {
-            submitDisabled = true;
+            return true;
           }
-        });
 
-        return submitDisabled;
+          // if (element.elements) {
+          //   return this.submitDisabled(element.elements);
+          // }
+        }
+
+        return false;
       },
       submitForm(): void {
         const model: any = {};
@@ -93,8 +99,10 @@
       },
       reset(emit: boolean = false) {
         const elements: IFormElement[] = cloneDeep(this.schema.elements);
-        const isValid = () => {
-          return true;
+        const isValid = (): IFormValidResult => {
+          return {
+            isValid: true,
+          };
         };
 
         this.$data.elements = elements.map((element: IFormElement, idx: number) => {
@@ -115,7 +123,6 @@
     watch:      {
       schema(newSchema: IFormSchema) {
         this.$data.elements.forEach((element: IFormElement, idx: number) => {
-          element.invalidText = newSchema.elements[idx].invalidText;
           element.label = newSchema.elements[idx].label;
         });
       },
